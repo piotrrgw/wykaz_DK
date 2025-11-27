@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kalkulator minut niebezpiecznych</title>
+  <style>
+    :root{
+      --pantone-281: #002664;
+      --pantone-165: #FF6319;
+      --pantone-112: #0097D9;
+      --cool-gray-4: #C5C7C8;
+      --bg: #ffffff;
+      --card-bg: #ffffff;
+      --max-width: 1100px;
+      --radius: 10px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#f7f8fb 0%, #ffffff 100%);
+      color: var(--pantone-281);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:24px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:var(--max-width);
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .logo{
+      display:flex;align-items:center;gap:12px
+    }
+    .brand-square{width:56px;height:40px;border-radius:6px;background:linear-gradient(135deg,var(--pantone-281),var(--pantone-112));box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:0;color:var(--pantone-281);opacity:.9}
+
+    main.card{
+      background:var(--card-bg);
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow:0 8px 30px rgba(2,6,23,0.06);
+    }
+
+    /* --- ZMODYFIKOWANY BLOK CSS DLA PRZYCISKÓW --- */
+    .controls{
+      display:flex;
+      flex-wrap:wrap; /* Pozwala przyciskom zawijać się, gdy brakuje miejsca */
+      gap:12px;
+      margin-bottom:16px;
+      align-items:center;
+    }
+
+    .btn{
+      background:var(--pantone-165);
+      color:white;
+      border:none;
+      padding:10px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      box-shadow:0 6px 18px rgba(255,99,25,0.12);
+      transition: background-color 0.2s, color 0.2s, box-shadow 0.2s; /* Płynne przejście */
+    }
+
+    .btn.secondary{
+      background:transparent;
+      color:var(--pantone-281);
+      border:2px solid var(--pantone-112);
+      box-shadow:none; /* Usunięcie cienia dla spójności */
+    }
+    
+    .btn.danger{
+      background:#e74c3c;
+      box-shadow: 0 6px 18px rgba(231, 76, 60, 0.15);
+    }
+    
+    /* NOWA REGUŁA: Przesuwa przycisk Oblicz na prawo na desktopie */
+    #calc {
+      margin-left: auto;
+    }
+    /* --- KONIEC MODYFIKACJI --- */
+
+    .rows{display:flex;flex-direction:column;gap:12px}
+    .row{
+      display:grid;grid-template-columns: 1fr 1fr 160px 140px auto; /* Ostatnia kolumna auto */
+      gap:12px;align-items:center;padding:12px;border-radius:8px;border:1px dashed var(--cool-gray-4);
+    }
+    .row .remove {
+      justify-self: end; /* Domyślnie przycisk "Usuń" na prawo */
+    }
+
+    label{font-size:12px;color:var(--pantone-281);display:block;margin-bottom:6px}
+    input[type="time"], select{
+      width:100%;padding:8px 10px;border-radius:6px;border:1px solid #e6e9ec;font-size:14px
+    }
+    .small{font-size:13px;color:#334155}
+
+    .result{
+      margin-top:18px;padding:14px;border-radius:8px;background:linear-gradient(90deg, rgba(0,150,217,0.08), rgba(255,99,25,0.04));border:1px solid rgba(0,0,0,0.04)
+    }
+    .result h2{margin:0 0 6px 0;font-size:16px}
+    .error{color:#b91c1c;background:#fff4f4;padding:10px;border:1px solid #fecaca;border-radius:6px}
+
+    footer{
+      margin-top:18px;padding-top:12px;border-top:1px solid #eef2f7;color:var(--pantone-281);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px
+    }
+    footer a{color:var(--pantone-112);text-decoration:none;font-weight:600}
+    .meta{font-size:13px;color:#475569}
+
+
+    /* --- NOWE, POPRAWIONE MEDIA QUERIES --- */
+    /* Breakpoint dla tabletów i telefonów (pokrywa Lenovo Tab M9 i iPhone 13) */
+    @media (max-width: 768px){
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .row{
+        grid-template-columns: 1fr; /* Wszystkie elementy w jednej kolumnie */
+        gap: 16px; /* Zwiększony odstęp dla czytelności */
+      }
+      
+      .row .remove{
+        justify-self: start; /* Przycisk Usuń na lewo, pod inputami */
+      }
+      
+      .controls{
+        flex-direction:column; /* Przyciski jeden pod drugim */
+        align-items:stretch; /* Przyciski na całą szerokość kontenera */
+      }
+      
+      /* Resetujemy margines dla przycisku Oblicz na mobile */
+      #calc {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <div class="brand-square" aria-hidden></div>
+        <div>
+          <h1>Kalkulator minut niebezpiecznych</h1>
+          <p class="lead">Wprowadź przedziały czasu. Zaznacz, czy to przyjęcie, zdanie lub próba hamulca.</p>
+        </div>
+      </div>
+      <div class="meta">Maks: Przyjęcie 20 min · Zdanie 10 min</div>
+    </header>
+
+    <main class="card" role="main">
+      <!-- UPROSZCZONY HTML DLA PRZYCISKÓW -->
+      <section class="controls">
+        <button id="addRow" class="btn" type="button">Dodaj przedział</button>
+        <button id="clearAll" class="btn secondary" type="button">Wyczyść</button>
+        <button id="calc" class="btn" type="button">Oblicz</button>
+      </section>
+
+      <section>
+        <div class="rows" id="rows"></div>
+        <!-- Sekcja .actions została usunięta, bo była zbędna -->
+        <div id="output"></div>
+      </section>
+    </main>
+
+    <footer>
+      <div>Autor: <strong>Navi 🚀</strong> — <a href="https://chatgpt.com" target="_blank" rel="noopener">https://chatgpt.com</a> oraz Piotr M 🚂</div>
+    </footer>
+  </div>
+
+  <template id="rowTpl">
+    <div class="row">
+      <div>
+        <label>Start (HH:MM)</label>
+        <input type="time" class="start" />
+      </div>
+      <div>
+        <label>Koniec (HH:MM)</label>
+        <input type="time" class="end" />
+      </div>
+      <div>
+        <label>Rodzaj</label>
+        <select class="type">
+          <option value="przyjecie">Przyjęcie</option>
+          <option value="zdanie">Zdanie</option>
+        </select>
+      </div>
+      <div>
+        <label>Próba hamulca</label>
+        <input type="checkbox" class="proba" />
+      </div>
+      <!-- POPRAWIONY PRZYCISK USUŃ -->
+      <div>
+        <button type="button" class="btn danger remove" title="Usuń">Usuń</button>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (function(){
+      const maxPrzyjecie = 20;
+      const maxZdanie = 10;
+      const rowsEl = document.getElementById('rows');
+      const addRowBtn = document.getElementById('addRow');
+      const calcBtn = document.getElementById('calc');
+      const clearBtn = document.getElementById('clearAll');
+      const output = document.getElementById('output');
+      const rowTpl = document.getElementById('rowTpl').content;
+
+      function addRow(start='', end='', type='przyjecie'){
+        const node = document.importNode(rowTpl, true);
+        const wrapper = node.querySelector('.row');
+        const startEl = node.querySelector('.start');
+        const endEl = node.querySelector('.end');
+        const typeEl = node.querySelector('.type');
+        const removeBtn = node.querySelector('.remove');
+        startEl.value = start;
+        endEl.value = end;
+        typeEl.value = type;
+        removeBtn.addEventListener('click', ()=>{ wrapper.remove(); });
+        rowsEl.appendChild(node);
+      }
+
+      function clearAll(){ rowsEl.innerHTML=''; output.innerHTML=''; }
+
+      function parseTimeToMinutes(t){
+        if(!t) return null;
+        const parts = t.split(':');
+        if(parts.length!==2) return null;
+        const hh = parseInt(parts[0],10);
+        const mm = parseInt(parts[1],10);
+        if(Number.isNaN(hh) || Number.isNaN(mm) || hh<0 || hh>23 || mm<0 || mm>59) return null;
+        return hh*60 + mm;
+      }
+
+      function validateAndCompute(){
+        const rowNodes = Array.from(rowsEl.querySelectorAll('.row'));
+        const errors = [];
+        if(rowNodes.length===0){ errors.push('Brak wprowadzonych przedziałów.'); }
+        let totalDanger = 0;
+        rowNodes.forEach((r, idx)=>{
+          const s = r.querySelector('.start').value.trim();
+          const e = r.querySelector('.end').value.trim();
+          const t = r.querySelector('.type').value;
+          const proba = r.querySelector('.proba').checked;
+          const sMin = parseTimeToMinutes(s);
+          const eMin = parseTimeToMinutes(e);
+          if(sMin===null) errors.push(`W wierszu ${idx+1}: nieprawidłowy start.`);
+          if(eMin===null) errors.push(`W wierszu ${idx+1}: nieprawidłowy koniec.`);
+          if(sMin!==null && eMin!==null){
+            let duration = eMin - sMin;
+            if(duration <= 0) duration = (eMin + 24*60) - sMin;
+            if(duration <= 0) errors.push(`W wierszu ${idx+1}: nieprawidłowy przedział (czas 0).`);
+            else {
+              if(proba){
+                totalDanger += duration;
+              } else if(t==='przyjecie'){
+                totalDanger += Math.min(duration, maxPrzyjecie);
+              } else {
+                totalDanger += Math.min(duration, maxZdanie);
+              }
+            }
+          }
+        });
+        return {errors, totalDanger};
+      }
+
+      addRowBtn.addEventListener('click', ()=> addRow());
+      clearBtn.addEventListener('click', ()=> clearAll());
+      addRow('23:50','00:10','przyjecie');
+      addRow('09:30','09:50','zdanie');
+
+      calcBtn.addEventListener('click', ()=>{
+        output.innerHTML='';
+        const res = validateAndCompute();
+        if(res.errors.length){
+          const errHtml = res.errors.map(e=>`<div>${escapeHtml(e)}</div>`).join('');
+          output.innerHTML = `<div class="error"><strong>Wystąpiły błędy:</strong>${errHtml}</div>`;
+          return;
+        }
+        output.innerHTML = `<div class="result"><h2>Wynik</h2><div><strong>Minuty niebezpieczne:</strong> ${res.totalDanger} min</div></div>`;
+      });
+
+      function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+      document.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){
+          e.preventDefault();
+          calcBtn.click();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
